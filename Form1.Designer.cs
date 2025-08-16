@@ -35,6 +35,7 @@
             tog1 = new RadioButton();
             tog2 = new RadioButton();
             image = new Panel();
+            lb_m_name = new Label();
             repaint = new Button();
             btn_generate_role = new Button();
             btn_generate_mount = new Button();
@@ -53,6 +54,9 @@
             num_r_x = new NumericUpDown();
             btn_pre = new Button();
             btn_next = new Button();
+            tog3 = new CheckBox();
+            tog4 = new CheckBox();
+            image.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)num_m_scale).BeginInit();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)num_m_y).BeginInit();
@@ -92,9 +96,11 @@
             // 
             // btn_go
             // 
-            btn_go.Location = new Point(606, 367);
+            btn_go.Font = new Font("Microsoft YaHei UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btn_go.ForeColor = SystemColors.HotTrack;
+            btn_go.Location = new Point(584, 367);
             btn_go.Name = "btn_go";
-            btn_go.Size = new Size(132, 65);
+            btn_go.Size = new Size(187, 65);
             btn_go.TabIndex = 3;
             btn_go.Text = "开始合图";
             btn_go.UseVisualStyleBackColor = true;
@@ -127,14 +133,24 @@
             // image
             // 
             image.BackColor = SystemColors.ActiveCaption;
+            image.Controls.Add(lb_m_name);
             image.Location = new Point(32, 68);
             image.Name = "image";
             image.Size = new Size(532, 370);
             image.TabIndex = 9;
             // 
+            // lb_m_name
+            // 
+            lb_m_name.AutoSize = true;
+            lb_m_name.Location = new Point(225, 5);
+            lb_m_name.Name = "lb_m_name";
+            lb_m_name.Size = new Size(43, 17);
+            lb_m_name.TabIndex = 0;
+            lb_m_name.Text = "label6";
+            // 
             // repaint
             // 
-            repaint.Location = new Point(606, 80);
+            repaint.Location = new Point(713, 12);
             repaint.Name = "repaint";
             repaint.Size = new Size(75, 23);
             repaint.TabIndex = 10;
@@ -193,7 +209,7 @@
             groupBox1.Controls.Add(num_m_scale);
             groupBox1.Controls.Add(btn_m_reszie);
             groupBox1.Controls.Add(btn_generate_mount);
-            groupBox1.Location = new Point(584, 201);
+            groupBox1.Location = new Point(584, 172);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(175, 114);
             groupBox1.TabIndex = 15;
@@ -251,13 +267,13 @@
             // 
             // groupBox2
             // 
-            groupBox2.BackColor = SystemColors.Control;
+            groupBox2.BackColor = SystemColors.ButtonFace;
             groupBox2.Controls.Add(label2);
             groupBox2.Controls.Add(label1);
             groupBox2.Controls.Add(num_r_y);
             groupBox2.Controls.Add(num_r_x);
             groupBox2.Controls.Add(btn_generate_role);
-            groupBox2.Location = new Point(586, 114);
+            groupBox2.Location = new Point(586, 71);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(173, 84);
             groupBox2.TabIndex = 16;
@@ -306,7 +322,7 @@
             // 
             // btn_pre
             // 
-            btn_pre.Location = new Point(594, 324);
+            btn_pre.Location = new Point(599, 288);
             btn_pre.Name = "btn_pre";
             btn_pre.Size = new Size(56, 26);
             btn_pre.TabIndex = 17;
@@ -316,7 +332,7 @@
             // 
             // btn_next
             // 
-            btn_next.Location = new Point(676, 325);
+            btn_next.Location = new Point(681, 289);
             btn_next.Name = "btn_next";
             btn_next.Size = new Size(56, 26);
             btn_next.TabIndex = 18;
@@ -324,11 +340,37 @@
             btn_next.UseVisualStyleBackColor = true;
             btn_next.Click += btn_next_Click;
             // 
+            // tog3
+            // 
+            tog3.AutoSize = true;
+            tog3.Checked = true;
+            tog3.CheckState = CheckState.Checked;
+            tog3.Location = new Point(582, 344);
+            tog3.Name = "tog3";
+            tog3.Size = new Size(120, 21);
+            tog3.TabIndex = 19;
+            tog3.Text = "删除191以后的帧";
+            tog3.UseVisualStyleBackColor = true;
+            // 
+            // tog4
+            // 
+            tog4.AutoSize = true;
+            tog4.Checked = true;
+            tog4.CheckState = CheckState.Checked;
+            tog4.Location = new Point(706, 344);
+            tog4.Name = "tog4";
+            tog4.Size = new Size(75, 21);
+            tog4.TabIndex = 20;
+            tog4.Text = "优化尺寸";
+            tog4.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(tog4);
+            Controls.Add(tog3);
             Controls.Add(btn_next);
             Controls.Add(btn_pre);
             Controls.Add(groupBox2);
@@ -344,6 +386,8 @@
             Name = "Form1";
             Text = "地仙_坐骑合成";
             Load += Form1_Load;
+            image.ResumeLayout(false);
+            image.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)num_m_scale).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
@@ -385,5 +429,8 @@
         private Label label1;
         private Button btn_pre;
         private Button btn_next;
+        private Label lb_m_name;
+        private CheckBox tog3;
+        private CheckBox tog4;
     }
 }
