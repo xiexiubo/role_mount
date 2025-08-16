@@ -142,7 +142,26 @@ namespace mount_role
                 });
                 //删除临时导出（resize图）
                 Directory.Delete(pathMount_export2, true);
+
+                // 启动资源管理器并指定目录
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"\"{pathMount_export}\"", // 使用引号包裹路径，处理包含空格的路径
+                    UseShellExecute = true
+                });
             }
+            else 
+            {
+                // 启动资源管理器并指定目录
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"\"{pathMount_export2}\"", // 使用引号包裹路径，处理包含空格的路径
+                    UseShellExecute = true
+                });
+            }
+         
 
             AddLog("---------------完成------------------",Color.Green);
         }

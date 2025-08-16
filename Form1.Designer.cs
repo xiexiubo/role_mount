@@ -98,7 +98,7 @@
             // 
             btn_go.Font = new Font("Microsoft YaHei UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btn_go.ForeColor = SystemColors.HotTrack;
-            btn_go.Location = new Point(584, 367);
+            btn_go.Location = new Point(582, 367);
             btn_go.Name = "btn_go";
             btn_go.Size = new Size(187, 65);
             btn_go.TabIndex = 3;
@@ -150,7 +150,7 @@
             // 
             // repaint
             // 
-            repaint.Location = new Point(713, 12);
+            repaint.Location = new Point(680, 12);
             repaint.Name = "repaint";
             repaint.Size = new Size(75, 23);
             repaint.TabIndex = 10;
@@ -322,7 +322,7 @@
             // 
             // btn_pre
             // 
-            btn_pre.Location = new Point(599, 288);
+            btn_pre.Location = new Point(599, 295);
             btn_pre.Name = "btn_pre";
             btn_pre.Size = new Size(56, 26);
             btn_pre.TabIndex = 17;
@@ -332,7 +332,7 @@
             // 
             // btn_next
             // 
-            btn_next.Location = new Point(681, 289);
+            btn_next.Location = new Point(681, 295);
             btn_next.Name = "btn_next";
             btn_next.Size = new Size(56, 26);
             btn_next.TabIndex = 18;
@@ -368,7 +368,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(783, 450);
             Controls.Add(tog4);
             Controls.Add(tog3);
             Controls.Add(btn_next);
@@ -383,6 +383,7 @@
             Controls.Add(image);
             Controls.Add(btn_open);
             Controls.Add(txtFolderPath);
+            FormBorderStyle = FormBorderStyle.Fixed3D;
             Name = "Form1";
             Text = "地仙_坐骑合成";
             Load += Form1_Load;
