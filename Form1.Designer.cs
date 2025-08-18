@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             txtFolderPath = new TextBox();
             btn_open = new Button();
             logTextBox = new RichTextBox();
@@ -384,6 +385,7 @@
             Controls.Add(btn_open);
             Controls.Add(txtFolderPath);
             FormBorderStyle = FormBorderStyle.Fixed3D;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
             Text = "地仙_坐骑合成";
             Load += Form1_Load;
