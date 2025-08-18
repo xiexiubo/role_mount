@@ -150,6 +150,7 @@ namespace mount_role
                     Arguments = $"\"{pathMount_export}\"", // 使用引号包裹路径，处理包含空格的路径
                     UseShellExecute = true
                 });
+                AddLog($"导出目录{pathMount_export}");
             }
             else 
             {
@@ -160,6 +161,7 @@ namespace mount_role
                     Arguments = $"\"{pathMount_export2}\"", // 使用引号包裹路径，处理包含空格的路径
                     UseShellExecute = true
                 });
+                AddLog($"导出目录{pathMount_export2}");
             }
          
 

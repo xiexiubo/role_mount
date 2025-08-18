@@ -67,7 +67,7 @@ public class ImageCropper
 
         if (action != null)
         {
-            action($"优化前 newWidth {newWidth},newHeight {newHeight} ");
+            action($"优化前 Width {newWidth},Height {newHeight} ");
         }
 
         newWidth = newWidth - 2 * x;
@@ -75,7 +75,7 @@ public class ImageCropper
 
         if (action != null)
         {
-            action($"优化 newWidth {newWidth},newHeight {newHeight} ");
+            action($"优化后 newWidth {newWidth},newHeight {newHeight} ");
         }
         foreach (string imagePath in listImagePaths)
         {
