@@ -20,8 +20,8 @@ namespace mount_role
         {
             //绘制订阅
             image.Paint += image_Paint;
-            this.pos_role.X = (int)this.num_r_x.Value;      
-            this.pos_role.Y = (int)this.num_r_y.Value; 
+            this.pos_role.X = (int)this.num_r_x.Value;
+            this.pos_role.Y = (int)this.num_r_y.Value;
             this.pos_mount.X = (int)this.num_m_x.Value;
             this.pos_mount.Y = (int)this.num_m_y.Value;
         }
@@ -96,98 +96,72 @@ namespace mount_role
 
         }
 
-        public void doSomething()
+        public async void doSomething()
         {
-            //string path = AppDomain.CurrentDomain.BaseDirectory + "\\已选中骑马衣服-火龙png";
-            //AddLog(path);
-            //string[] subDirectories = Directory.GetDirectories(path);
-            //foreach (string dir in subDirectories)
-            //{
-            //    DirectoryInfo dirInfo = new DirectoryInfo(dir);
-            //    AddLog(dirInfo.Name);
-            //}
-            //// 加载文件
-            //string[] files = Directory.GetFiles(path);
-            //foreach (string file in files)
-            //{
-            //    FileInfo fileInfo = new FileInfo(file);
-            //    AddLog(fileInfo.Name);
-            //}
-            //
+
             AddLog("开始合图！");
             string pathMount = txtFolderPath.Text;
-            string pathMount_export = Path.Combine(pathMount, "导出");
-            string pathMount_export2 = Path.Combine(pathMount, "导-出");
-            if (!Path.Exists(pathMount_export))
-            {
-                this.listImagePath = ResizePngSave(pathMount);
-            }
-            //如果已经生成先删除
-            if (Path.Exists(pathMount_export2))
-                Directory.Delete(pathMount_export2,true);
-            //修改中心点后重新生成尺寸图
-            var list = this.CombinePngSave();         
+            string tempPath1 = Path.Combine(pathMount, "导出");
+            string tempPath2 = Path.Combine(pathMount, "导出_优化");
+            string tempPath3 = Path.Combine(pathMount, "导出_合成");
 
-            //删除临时导出（resize图）
-            Directory.Delete(pathMount_export, true);
-
+            this.listImagePath = ResizePngSave(pathMount, tempPath1);
             if (this.tog4.Checked)
             {
                 AddLog("优化尺寸", Color.Brown);
                 AddLog("优化中。。。", Color.Green);
                 ImageCropper cropper = new ImageCropper();
-                cropper.ProcessImages(list, pathMount_export, (s) =>
+                await cropper.ProcessImagesAsync(this.listImagePath, tempPath2, (s) =>
                 {
                     AddLog(s);
                 });
-                //删除临时导出（resize图）
-                Directory.Delete(pathMount_export2, true);
-
-                // 启动资源管理器并指定目录
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "explorer.exe",
-                    Arguments = $"\"{pathMount_export}\"", // 使用引号包裹路径，处理包含空格的路径
-                    UseShellExecute = true
-                });
-                AddLog($"导出目录{pathMount_export}");
             }
-            else 
+            //修改中心点后重新生成尺寸图
+            var list = this.CombinePngSave(this.listImagePath, tempPath3);
+
+            // 启动资源管理器并指定目录
+            Process.Start(new ProcessStartInfo
             {
-                // 启动资源管理器并指定目录
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "explorer.exe",
-                    Arguments = $"\"{pathMount_export2}\"", // 使用引号包裹路径，处理包含空格的路径
-                    UseShellExecute = true
-                });
-                AddLog($"导出目录{pathMount_export2}");
-            }
-         
-
-            AddLog("---------------完成------------------",Color.Green);
+                FileName = "explorer.exe",
+                Arguments = $"\"{tempPath3}\"", // 使用引号包裹路径，处理包含空格的路径
+                UseShellExecute = true
+            });
+            AddLog($"导出目录{tempPath3}");
+            AddLog("---------------完成------------------", Color.Green);
         }
         private void btn_generate_role_Click(object sender, EventArgs e)
         {
             string pathRole = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "已选中骑马衣服-火龙png");
-            //string pathMount = txtFolderPath.Text;
-            ResizePngSave(pathRole);
-            //this.listImagePath = ResizePngSave(pathMount);
+            string pathMount_export = Path.Combine(pathRole, "导出");
+            ResizePngSave(pathRole, pathMount_export);
         }
 
-        private void btn_generate_mount_Click(object sender, EventArgs e)
+        private async void btn_generate_mount_Click(object sender, EventArgs e)
         {
             //string pathRole = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "已选中骑马衣服-火龙png");
             string pathMount = txtFolderPath.Text;
-            //ResizePngSave(pathRole);
-            this.listImagePath = ResizePngSave(pathMount);
-            SetImage();
-            _repaint();
+            string pathMount_export = Path.Combine(pathMount, "导出");
+            this.listImagePath = ResizePngSave(pathMount, pathMount_export);
+            if (this.tog4.Checked)
+            {
+                AddLog("优化尺寸", Color.Brown);
+                AddLog("优化中。。。", Color.Green);
+                ImageCropper cropper = new ImageCropper();
+                string tempPath2 = Path.Combine(pathMount, "导出_优化");
+                await cropper.ProcessImagesAsync(this.listImagePath, tempPath2, AddLog);
+            }
+            this.SetImage();
+            this._repaint();
             this.tog2.Checked = true;
         }
 
         private Size sizeOut = Size.Empty;
-        public List<string> ResizePngSave(string path)  // 修正方法名格式（ PascalCase 规范）
+        /// <summary>
+        /// (读出placements 偏移，重新生成对齐的统一尺寸序列图)
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public List<string> ResizePngSave(string path, string outDir)  // 修正方法名格式（ PascalCase 规范）
         {
             List<string> list = new List<string>();
             AddLog($"ResizePngSave - {path}");
@@ -207,7 +181,16 @@ namespace mount_role
             {
                 FileInfo fileInfo = new FileInfo(file);
                 // AddLog($"{fileInfo.Name} - {file}");
-
+                //去掉不要动作帧
+                if (this.tog3.Checked)
+                {
+                    int id = 0;
+                    if (int.TryParse(Path.GetFileNameWithoutExtension(file), out id))
+                    {
+                        if (id > 191)
+                            continue;
+                    }
+                }
                 try
                 {
                     int width = 0;
@@ -236,7 +219,7 @@ namespace mount_role
                     // 检查TXT文件是否存在
                     if (!File.Exists(pathTxt))
                     {
-                        AddLog($"错误: 对应TXT文件不存在 - {pathTxt}",Color.Red);
+                        AddLog($"错误: 对应TXT文件不存在 - {pathTxt}", Color.Red);
                         continue;
                     }
 
@@ -248,7 +231,7 @@ namespace mount_role
                     }
                     catch (Exception ex)
                     {
-                        AddLog($"读取TXT文件出错: {ex.Message}",Color.Red);
+                        AddLog($"读取TXT文件出错: {ex.Message}", Color.Red);
                         continue;
                     }
 
@@ -298,7 +281,7 @@ namespace mount_role
                 else
                     outv = Rectangle.Union(outv, new Rectangle(v.X, v.Y, v.Width + v.X, v.Height + v.Y));
             }
-            
+
             AddLog($"联合矩形: {outv}");
 
 
@@ -320,9 +303,9 @@ namespace mount_role
                 try
                 {
                     // 构建安全的保存路径（避免替换字符串失败）
-                    string dir = Path.GetDirectoryName(v.Key);
+                    //string dir = Path.GetDirectoryName(v.Key);
                     string fileName = Path.GetFileName(v.Key);
-                    string saveDir = Path.Combine(dir, "导出");
+                    string saveDir = outDir;//Path.Combine(dir, "导出");
                     Directory.CreateDirectory(saveDir); // 确保保存目录存在
                     string savePath = Path.Combine(saveDir, fileName);
 
@@ -376,28 +359,28 @@ namespace mount_role
             }
             return list;
         }
-        private List<string> CombinePngSave()
+        private List<string> CombinePngSave(List<string> inputPaths, string outDir)
         {
 
             this.largeImage = null;
             this.smallImage = null;
-            List<string> list= new List<string>();
-            for (int i = 0; i < listImagePath.Count; i++)
+            List<string> list = new List<string>();
+            for (int i = 0; i < inputPaths.Count; i++)
             {
-                var pathMount = listImagePath[i];
+                var pathMount = inputPaths[i];
                 try
                 {
                     // 构建安全的保存路径（避免替换字符串失败）
-                    string dir = Path.GetDirectoryName(pathMount);
+                    //string dir = Path.GetDirectoryName(pathMount);
                     string fileName = Path.GetFileName(pathMount);
-                    string saveDir = dir.Replace("导出","导-出");
+                    string saveDir = outDir;//dir.Replace("导出","导-出");
                     Directory.CreateDirectory(saveDir); // 确保保存目录存在
                     string savePath = Path.Combine(saveDir, fileName);
                     int newWidth = this.sizeOut.Width + Math.Abs(this.pos_mount.X) * 2;
                     int newHeight = this.sizeOut.Height + Math.Abs(this.pos_mount.Y) * 2;
 
                     //去掉不要动作帧
-                    if (this.tog3.Checked) 
+                    if (this.tog3.Checked)
                     {
                         int id = 0;
                         if (int.TryParse(fileName.Replace(".PNG", ""), out id))
@@ -405,12 +388,12 @@ namespace mount_role
                             if (id > 191)
                                 continue;
                         }
-                    }                   
+                    }
 
                     var pathRole = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "已选中骑马衣服-火龙png", "导出", fileName);// 小图路径 角色路径
 
-                    if (!Path.Exists(pathMount)) 
-                    { 
+                    if (!Path.Exists(pathMount))
+                    {
                         using (Bitmap outBmp1x1 = new Bitmap(1, 1))
                         {
                             outBmp1x1.Save(savePath, System.Drawing.Imaging.ImageFormat.Png);
@@ -419,14 +402,23 @@ namespace mount_role
                         }
                         continue;
                     }
-                  
-                    using (Bitmap outBmp = new Bitmap(newWidth, newHeight))
-                   
 
+                    using (Bitmap outBmp = new Bitmap(newWidth, newHeight))
                     using (FileStream fs = new FileStream(pathMount, FileMode.Open, FileAccess.Read))
-                    using (Image source = Image.FromStream(fs))                  
+                    using (Image source = Image.FromStream(fs))
                     using (Graphics g = Graphics.FromImage(outBmp))
-                    { 
+                    {
+
+                        if (source.Width <= 1 || source.Height <= 1)
+                        {
+                            using (Bitmap outBmp1x1 = new Bitmap(1, 1))
+                            {
+                                outBmp1x1.Save(savePath, System.Drawing.Imaging.ImageFormat.Png);
+                                AddLog($"outBmp1x1图片已保存: {savePath}", Color.Blue);
+                                list.Add(savePath);
+                            }
+                            continue;
+                        }
                         // 设置高质量绘制
                         g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
@@ -463,7 +455,7 @@ namespace mount_role
                     AddLog($"处理图片出错: {pathMount} - {ex.Message}");
                 }
             }
-           
+
             return list;
         }
 
@@ -513,7 +505,7 @@ namespace mount_role
             );
 
             // 2. 绘制小图
-            if (smallImage != null)
+            if (smallImage != null && this.tog_show_role.Checked)
             {
                 g.DrawImage(
                     smallImage,
@@ -698,6 +690,11 @@ namespace mount_role
             currIndex = Math.Min(listImagePath.Count - 1, currIndex);
             SetImage();
             _repaint();
+        }
+
+        private void tog_show_role_CheckedChanged(object sender, EventArgs e)
+        {
+            this._repaint();
         }
     }
 }

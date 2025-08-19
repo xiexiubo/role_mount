@@ -49,6 +49,7 @@
             num_m_y = new NumericUpDown();
             num_m_x = new NumericUpDown();
             groupBox2 = new GroupBox();
+            tog_show_role = new CheckBox();
             label2 = new Label();
             label1 = new Label();
             num_r_y = new NumericUpDown();
@@ -210,7 +211,7 @@
             groupBox1.Controls.Add(num_m_scale);
             groupBox1.Controls.Add(btn_m_reszie);
             groupBox1.Controls.Add(btn_generate_mount);
-            groupBox1.Location = new Point(584, 172);
+            groupBox1.Location = new Point(584, 190);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(175, 114);
             groupBox1.TabIndex = 15;
@@ -269,6 +270,7 @@
             // groupBox2
             // 
             groupBox2.BackColor = SystemColors.ButtonFace;
+            groupBox2.Controls.Add(tog_show_role);
             groupBox2.Controls.Add(label2);
             groupBox2.Controls.Add(label1);
             groupBox2.Controls.Add(num_r_y);
@@ -276,10 +278,23 @@
             groupBox2.Controls.Add(btn_generate_role);
             groupBox2.Location = new Point(586, 71);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(173, 84);
+            groupBox2.Size = new Size(173, 113);
             groupBox2.TabIndex = 16;
             groupBox2.TabStop = false;
             groupBox2.Text = "角色";
+            // 
+            // tog_show_role
+            // 
+            tog_show_role.AutoSize = true;
+            tog_show_role.Checked = true;
+            tog_show_role.CheckState = CheckState.Checked;
+            tog_show_role.Location = new Point(31, 86);
+            tog_show_role.Name = "tog_show_role";
+            tog_show_role.Size = new Size(75, 21);
+            tog_show_role.TabIndex = 19;
+            tog_show_role.Text = "显示角色";
+            tog_show_role.UseVisualStyleBackColor = true;
+            tog_show_role.CheckedChanged += tog_show_role_CheckedChanged;
             // 
             // label2
             // 
@@ -323,7 +338,7 @@
             // 
             // btn_pre
             // 
-            btn_pre.Location = new Point(599, 295);
+            btn_pre.Location = new Point(599, 308);
             btn_pre.Name = "btn_pre";
             btn_pre.Size = new Size(56, 26);
             btn_pre.TabIndex = 17;
@@ -333,7 +348,7 @@
             // 
             // btn_next
             // 
-            btn_next.Location = new Point(681, 295);
+            btn_next.Location = new Point(681, 308);
             btn_next.Name = "btn_next";
             btn_next.Size = new Size(56, 26);
             btn_next.TabIndex = 18;
@@ -435,5 +450,6 @@
         private Label lb_m_name;
         private CheckBox tog3;
         private CheckBox tog4;
+        private CheckBox tog_show_role;
     }
 }

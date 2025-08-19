@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -12,33 +13,41 @@ public class ImageCropper
     /// </summary>
     /// <param name="listImagePaths">图片路径列表</param>
     /// <param name="outputDirectory">输出目录</param>
-    public void ProcessImages(List<string> listImagePaths, string outputDirectory ,Action<string> action)
+    public async Task ProcessImagesAsync(List<string> listImagePaths, string outputDirectory, Action<string> action)
     {
+        List<string> outlist = new List<string>();
         // 创建输出目录（如果不存在）
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
         }
-        int x=-1, y=-1;
+
+        int x = -1, y = -1;
         int newWidth = 0;
         int newHeight = 0;
+
+        // 第一遍遍历：分析所有图片，确定裁剪参数
         foreach (string imagePath in listImagePaths)
         {
             try
             {
-                using (Bitmap originalImage = new Bitmap(imagePath))
+                // 使用异步方式加载图片
+                using (var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+                using (Bitmap originalImage = (Bitmap)await Task.Run(() => Bitmap.FromStream(stream)))
                 {
-                    if (originalImage.Width > 5)                    
+                    if (originalImage.Width > 5)
                     {
                         newWidth = originalImage.Width;
                         newHeight = originalImage.Height;
                     }
+
                     // 分析图片，获取需要裁剪的边界
                     (int top, int bottom, int left, int right) = GetCroppingBounds(originalImage);
 
                     // 确保上下裁剪量相同，左右裁剪量相同
                     int verticalCrop = Math.Min(top, bottom);
                     int horizontalCrop = Math.Min(left, right);
+
                     if (x < 1)
                     {
                         x = horizontalCrop;
@@ -56,7 +65,6 @@ public class ImageCropper
                     {
                         y = Math.Min(y, verticalCrop);
                     }
-                  
                 }
             }
             catch (Exception ex)
@@ -67,7 +75,7 @@ public class ImageCropper
 
         if (action != null)
         {
-            action($"优化前 Width {newWidth},Height {newHeight} ");
+            action($"优化前 Width {newWidth}, Height {newHeight} ");
         }
 
         newWidth = newWidth - 2 * x;
@@ -75,33 +83,76 @@ public class ImageCropper
 
         if (action != null)
         {
-            action($"优化后 newWidth {newWidth},newHeight {newHeight} ");
+            action($"优化后 newWidth {newWidth}, newHeight {newHeight} ");
         }
+
+        // 第二遍遍历：实际处理并保存图片
         foreach (string imagePath in listImagePaths)
         {
             try
             {
-                using (Bitmap originalImage = new Bitmap(imagePath))
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(imagePath));
+                if (!File.Exists(imagePath))
+                { // 保存1x1的图片
+                    using (Bitmap outBmp1x1 = new Bitmap(1, 1))
+                    {
+                        await Task.Run(() =>
+                        {
+                            using (var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
+                            {
+                                outBmp1x1.Save(outputStream, System.Drawing.Imaging.ImageFormat.Png);
+                                outlist.Add(outputPath);
+                            }
+                        });
+
+                        action?.Invoke($"优化 outBmp1x1图片已保存: {outputPath}");
+                    }
+                    continue;
+                }
+                // 异步加载图片
+                using (var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+                using (Bitmap originalImage = (Bitmap)await Task.Run(() => Bitmap.FromStream(stream)))
                 {
                     // 计算裁剪后的尺寸
-                     newWidth = originalImage.Width - 2 * x;
-                     newHeight = originalImage.Height - 2 * y;
+                    int croppedWidth = originalImage.Width - 2 * x;
+                    int croppedHeight = originalImage.Height - 2 * y;
 
                     // 确保裁剪后的尺寸有效
-                    if (newWidth <= 0 || newHeight <= 0)
+                    if (croppedWidth <= 0 || croppedHeight <= 0)
                     {
                         Debug.WriteLine($"图片 {Path.GetFileName(imagePath)} 裁剪后尺寸无效，跳过处理");
+
+                        // 保存1x1的图片
+                        using (Bitmap outBmp1x1 = new Bitmap(1, 1))
+                        {
+                            await Task.Run(() =>
+                            {
+                                using (var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
+                                {
+                                    outBmp1x1.Save(outputStream, System.Drawing.Imaging.ImageFormat.Png);
+                                    outlist.Add(outputPath);
+                                }
+                            });
+
+                            action?.Invoke($"优化 outBmp1x1图片已保存: {outputPath}");
+                        }
                         continue;
                     }
 
-                    // 执行裁剪
-                    using (Bitmap croppedImage = CropImage(originalImage, x, y, newWidth, newHeight))
+                    // 执行裁剪并保存
+                    using (Bitmap croppedImage = CropImage(originalImage, x, y, croppedWidth, croppedHeight))
                     {
-                        // 保存裁剪后的图片
-                        string outputPath = Path.Combine(outputDirectory, Path.GetFileName(imagePath));
-                        croppedImage.Save(outputPath, ImageFormat.Png);
+                        await Task.Run(() =>
+                        {
+                            using (var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
+                            {
+                                croppedImage.Save(outputStream, System.Drawing.Imaging.ImageFormat.Png);
+                                outlist.Add(outputPath);
+                            }
+                        });
+
+                        action?.Invoke($"优化 图片已保存: {outputPath}");
                         Debug.WriteLine($"已处理: {outputPath}");
-                        
                     }
                 }
             }
@@ -110,6 +161,8 @@ public class ImageCropper
                 Debug.WriteLine($"处理图片 {imagePath} 时出错: {ex.Message}");
             }
         }
+        listImagePaths.Clear();
+        listImagePaths.AddRange(outlist);
     }
 
     /// <summary>
