@@ -20,10 +20,16 @@ namespace mount_role
         {
             //绘制订阅
             image.Paint += image_Paint;
+            image.Scroll += Image_Scroll;
             this.pos_role.X = (int)this.num_r_x.Value;
             this.pos_role.Y = (int)this.num_r_y.Value;
             this.pos_mount.X = (int)this.num_m_x.Value;
             this.pos_mount.Y = (int)this.num_m_y.Value;
+        }
+
+        private void Image_Scroll(object? sender, ScrollEventArgs e)
+        {
+            this._repaint();
         }
 
         private void btn_open_Click(object sender, EventArgs e)
@@ -98,35 +104,45 @@ namespace mount_role
 
         public async void doSomething()
         {
-
+            this.largeImage = null;
+            this.smallImage = null;
             AddLog("开始合图！");
             string pathMount = txtFolderPath.Text;
             string tempPath1 = Path.Combine(pathMount, "导出");
             string tempPath2 = Path.Combine(pathMount, "导出_优化");
             string tempPath3 = Path.Combine(pathMount, "导出_合成");
-
+            string tempPath4 = Path.Combine(pathMount, "导出_优化_合成");
+            //1.----对齐-------
             this.listImagePath = ResizePngSave(pathMount, tempPath1);
+            //2.----优化-------
             if (this.tog4.Checked)
             {
                 AddLog("优化尺寸", Color.Brown);
                 AddLog("优化中。。。", Color.Green);
                 ImageCropper cropper = new ImageCropper();
-                await cropper.ProcessImagesAsync(this.listImagePath, tempPath2, (s) =>
-                {
-                    AddLog(s);
-                });
+                await cropper.ProcessImagesAsync(this.listImagePath, tempPath2, AddLog);
             }
-            //修改中心点后重新生成尺寸图
-            var list = this.CombinePngSave(this.listImagePath, tempPath3);
+            var outDir = tempPath3;
+            //3.----合并-------
+            this.listImagePath = this.CombinePngSave(this.listImagePath, tempPath3);
 
+            //4.----优化-------
+            if (this.tog4.Checked)
+            {
+                AddLog("合并后优化尺寸", Color.Brown);
+                AddLog("优化中。。。", Color.Green);
+                ImageCropper cropper = new ImageCropper();
+                await cropper.ProcessImagesAsync(this.listImagePath, tempPath4, AddLog);
+                outDir = tempPath4;
+            }
             // 启动资源管理器并指定目录
             Process.Start(new ProcessStartInfo
             {
                 FileName = "explorer.exe",
-                Arguments = $"\"{tempPath3}\"", // 使用引号包裹路径，处理包含空格的路径
+                Arguments = $"\"{outDir}\"", // 使用引号包裹路径，处理包含空格的路径
                 UseShellExecute = true
             });
-            AddLog($"导出目录{tempPath3}");
+            AddLog($"导出目录{outDir}");
             AddLog("---------------完成------------------", Color.Green);
         }
         private void btn_generate_role_Click(object sender, EventArgs e)
@@ -361,7 +377,6 @@ namespace mount_role
         }
         private List<string> CombinePngSave(List<string> inputPaths, string outDir)
         {
-
             this.largeImage = null;
             this.smallImage = null;
             List<string> list = new List<string>();
@@ -435,9 +450,10 @@ namespace mount_role
                             using (FileStream fsRole = new FileStream(pathRole, FileMode.Open, FileAccess.Read))
                             using (Image role = Image.FromStream(fsRole))
                             {
-                                srcX = newWidth / 2 - role.Width / 2 + 9;
-                                srcY = newHeight / 2 - role.Height / 2 + 9;
-
+                                srcX = srcX+source.Width / 2  + pos_role.X;
+                                srcY = srcY+source.Height / 2  + pos_role.Y;
+                                //scrollX + largeImage.Width / 2 + pos_mount.X + pos_role.X,
+                                //scrollY + largeImage.Height / 2 + pos_mount.Y + pos_role.Y
                                 // 绘制角色
                                 g.DrawImage(role, new Rectangle(srcX, srcY, role.Width, role.Height));
                             }
@@ -493,54 +509,64 @@ namespace mount_role
             Debug.WriteLine($"scrollX{scrollX}   scrollY{scrollY}");
 
             // 3. 计算大图中心点（考虑用户调整的偏移量）
-            int centerX = image.Width / 2;
-            int centerY = image.Height / 2;
-
-
+            if (this.tog_debug.Checked)
+                g.DrawRectangle(new Pen(Color.Red, 2), new Rectangle(0, 0, image.Width - 1, image.Height - 1));
             // 1. 绘制大图（考虑滚动和用户调整的偏移量）
             g.DrawImage(
                 largeImage,
-                centerX - largeImage.Width / 2 + scrollX + pos_mount.X,  // 加入X方向微调
-                centerY - largeImage.Height / 2 + scrollY + pos_mount.Y   // 加入Y方向微调
+                scrollX + pos_mount.X,  // 加入X方向微调
+                scrollY + pos_mount.Y   // 加入Y方向微调
             );
+            if (this.tog_debug.Checked)
+                g.DrawRectangle(new Pen(Color.Green, 1), new Rectangle(scrollX + pos_mount.X, scrollY + pos_mount.Y, largeImage.Width, largeImage.Height));
 
             // 2. 绘制小图
             if (smallImage != null && this.tog_show_role.Checked)
             {
                 g.DrawImage(
                     smallImage,
-                    centerX - smallImage.Width / 2 + scrollX + pos_role.X,
-                    centerY - smallImage.Height / 2 + scrollY + pos_role.Y
+                     scrollX + largeImage.Width / 2 + pos_mount.X + pos_role.X,
+                     scrollY + largeImage.Height / 2 + pos_mount.Y + pos_role.Y
                 );
+                if (this.tog_debug.Checked)
+                    g.DrawRectangle(new Pen(Color.Green, 1), 
+                        new Rectangle(
+                            scrollX + largeImage.Width / 2 + pos_mount.X + pos_role.X,
+                            scrollY + largeImage.Height / 2 + pos_mount.Y + pos_role.Y, 
+                         smallImage.Width, smallImage.Height));
             }
 
-
-
-            // 4. 绘制绿色虚线十字线
-            using (Pen greenPen = new Pen(Color.Green, 2)
+            if (this.tog_debug.Checked)
             {
-                DashStyle = DashStyle.Dash,
-                DashCap = DashCap.Round
-            })
-            {
-                // 水平线
-                g.DrawLine(
-                    greenPen,
-                    scrollX,
-                    scrollY + centerY,
-                    scrollX + largeImage.Width * 2,  // 线长适当加长
-                    scrollY + centerY
-                );
+                // 4. 绘制绿色虚线十字线
+                using (Pen greenPen = new Pen(Color.White, 0.2f)
+                {
+                    DashStyle = DashStyle.Dash,
+                    DashCap = DashCap.Round
+                })
+                {
+                    // 水平线
+                    g.DrawLine(
+                        greenPen,
+                         scrollX ,//+ pos_mount.X,
+                         scrollY + largeImage.Height / 2 ,//+ pos_mount.Y,
+                         scrollX + largeImage.Width * 2 ,//+ pos_mount.X,  // 线长适当加长
+                         scrollY + largeImage.Height / 2 //+ pos_mount.Y
+                    );
 
-                // 垂直线
-                g.DrawLine(
-                    greenPen,
-                    scrollX + centerX,
-                    scrollY,
-                    scrollX + centerX,
-                    scrollY + largeImage.Height * 2  // 线长适当加长
-                );
+                    // 垂直线
+                    g.DrawLine(
+                        greenPen,
+                         scrollX + largeImage.Width / 2 ,//+ pos_mount.X,
+                         scrollY ,//+ pos_mount.Y,
+                         scrollX + largeImage.Width / 2,// + pos_mount.X,
+                         scrollY + largeImage.Height * 2 //+ pos_mount.Y  // 线长适当加长
+                    );
+                }
+
+
             }
+
         }
 
         List<string> listImagePath = new List<string>();
@@ -621,8 +647,8 @@ namespace mount_role
         private void btn_m_reszie_Click(object sender, EventArgs e)
         {
             AddLog("缩放坐骑");
-            this.largeImage.Dispose();// = null;
-            this.smallImage.Dispose();// = null;
+            this.largeImage = null;
+            this.smallImage = null;
             for (int i = 0; i < listImagePath.Count; i++)
             {
                 string path = listImagePath[i];
@@ -693,6 +719,11 @@ namespace mount_role
         }
 
         private void tog_show_role_CheckedChanged(object sender, EventArgs e)
+        {
+            this._repaint();
+        }
+
+        private void tog_debug_CheckedChanged(object sender, EventArgs e)
         {
             this._repaint();
         }

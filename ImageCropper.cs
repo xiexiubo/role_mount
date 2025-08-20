@@ -31,6 +31,10 @@ public class ImageCropper
         {
             try
             {
+                if (!File.Exists(imagePath)) 
+                {
+                    continue;
+                }
                 // 使用异步方式加载图片
                 using (var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
                 using (Bitmap originalImage = (Bitmap)await Task.Run(() => Bitmap.FromStream(stream)))
@@ -69,7 +73,7 @@ public class ImageCropper
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"处理图片 {imagePath} 时出错: {ex.Message}");
+                Debug.WriteLine($"1处理图片 {imagePath} 时出错: {ex.Message}");
             }
         }
 
@@ -120,7 +124,7 @@ public class ImageCropper
                     // 确保裁剪后的尺寸有效
                     if (croppedWidth <= 0 || croppedHeight <= 0)
                     {
-                        Debug.WriteLine($"图片 {Path.GetFileName(imagePath)} 裁剪后尺寸无效，跳过处理");
+                        Debug.WriteLine($"图片 {Path.GetFileName(imagePath)} 裁剪后尺寸无效，跳过处理{croppedWidth},{croppedHeight}");
 
                         // 保存1x1的图片
                         using (Bitmap outBmp1x1 = new Bitmap(1, 1))
@@ -158,7 +162,7 @@ public class ImageCropper
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"处理图片 {imagePath} 时出错: {ex.Message}");
+                Debug.WriteLine($"2处理图片 {imagePath} 时出错: {ex.Message}");
             }
         }
         listImagePaths.Clear();

@@ -58,6 +58,7 @@
             btn_next = new Button();
             tog3 = new CheckBox();
             tog4 = new CheckBox();
+            tog_debug = new CheckBox();
             image.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)num_m_scale).BeginInit();
             groupBox1.SuspendLayout();
@@ -92,7 +93,7 @@
             logTextBox.Location = new Point(32, 68);
             logTextBox.Name = "logTextBox";
             logTextBox.ScrollBars = RichTextBoxScrollBars.Vertical;
-            logTextBox.Size = new Size(532, 370);
+            logTextBox.Size = new Size(544, 370);
             logTextBox.TabIndex = 2;
             logTextBox.Text = "";
             // 
@@ -152,7 +153,7 @@
             // 
             // repaint
             // 
-            repaint.Location = new Point(680, 12);
+            repaint.Location = new Point(198, 39);
             repaint.Name = "repaint";
             repaint.Size = new Size(75, 23);
             repaint.TabIndex = 10;
@@ -299,7 +300,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(94, 55);
+            label2.Location = new Point(86, 55);
             label2.Name = "label2";
             label2.Size = new Size(14, 17);
             label2.TabIndex = 18;
@@ -308,7 +309,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(18, 55);
+            label1.Location = new Point(5, 55);
             label1.Name = "label1";
             label1.Size = new Size(14, 17);
             label1.TabIndex = 17;
@@ -316,24 +317,24 @@
             // 
             // num_r_y
             // 
-            num_r_y.Location = new Point(111, 52);
+            num_r_y.Location = new Point(101, 52);
             num_r_y.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
             num_r_y.Minimum = new decimal(new int[] { 1000, 0, 0, int.MinValue });
             num_r_y.Name = "num_r_y";
-            num_r_y.Size = new Size(42, 23);
+            num_r_y.Size = new Size(56, 23);
             num_r_y.TabIndex = 16;
-            num_r_y.Value = new decimal(new int[] { 9, 0, 0, 0 });
+            num_r_y.Value = new decimal(new int[] { 113, 0, 0, int.MinValue });
             num_r_y.ValueChanged += num_r_y_ValueChanged;
             // 
             // num_r_x
             // 
-            num_r_x.Location = new Point(35, 52);
+            num_r_x.Location = new Point(20, 52);
             num_r_x.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
             num_r_x.Minimum = new decimal(new int[] { 1000, 0, 0, int.MinValue });
             num_r_x.Name = "num_r_x";
-            num_r_x.Size = new Size(42, 23);
+            num_r_x.Size = new Size(64, 23);
             num_r_x.TabIndex = 15;
-            num_r_x.Value = new decimal(new int[] { 11, 0, 0, 0 });
+            num_r_x.Value = new decimal(new int[] { 43, 0, 0, int.MinValue });
             num_r_x.ValueChanged += num_r_x_ValueChanged;
             // 
             // btn_pre
@@ -380,11 +381,25 @@
             tog4.Text = "优化尺寸";
             tog4.UseVisualStyleBackColor = true;
             // 
+            // tog_debug
+            // 
+            tog_debug.AutoSize = true;
+            tog_debug.Checked = true;
+            tog_debug.CheckState = CheckState.Checked;
+            tog_debug.Location = new Point(279, 42);
+            tog_debug.Name = "tog_debug";
+            tog_debug.Size = new Size(87, 21);
+            tog_debug.TabIndex = 21;
+            tog_debug.Text = "显示辅助线";
+            tog_debug.UseVisualStyleBackColor = true;
+            tog_debug.CheckedChanged += tog_debug_CheckedChanged;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(783, 450);
+            Controls.Add(tog_debug);
             Controls.Add(tog4);
             Controls.Add(tog3);
             Controls.Add(btn_next);
@@ -451,5 +466,6 @@
         private CheckBox tog3;
         private CheckBox tog4;
         private CheckBox tog_show_role;
+        private CheckBox tog_debug;
     }
 }
