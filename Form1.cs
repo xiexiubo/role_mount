@@ -321,6 +321,12 @@ namespace mount_role
                     // 构建安全的保存路径（避免替换字符串失败）
                     //string dir = Path.GetDirectoryName(v.Key);
                     string fileName = Path.GetFileName(v.Key);
+                    string fileName_num = Path.GetFileNameWithoutExtension(v.Key);
+                    int numfile;
+                    if (int.TryParse(fileName_num,out numfile))
+                    {
+                        fileName = $"{numfile:d5}.png";
+                    }
                     string saveDir = outDir;//Path.Combine(dir, "导出");
                     Directory.CreateDirectory(saveDir); // 确保保存目录存在
                     string savePath = Path.Combine(saveDir, fileName);
@@ -508,19 +514,20 @@ namespace mount_role
             int scrollY = image.AutoScrollPosition.Y;
             Debug.WriteLine($"scrollX{scrollX}   scrollY{scrollY}");
 
-            // 3. 计算大图中心点（考虑用户调整的偏移量）
+            // 1. 绘制背景边框
             if (this.tog_debug.Checked)
                 g.DrawRectangle(new Pen(Color.Red, 2), new Rectangle(0, 0, image.Width - 1, image.Height - 1));
-            // 1. 绘制大图（考虑滚动和用户调整的偏移量）
+            // 2. 绘制坐骑（考虑滚动和用户调整的偏移量）
             g.DrawImage(
                 largeImage,
                 scrollX + pos_mount.X,  // 加入X方向微调
                 scrollY + pos_mount.Y   // 加入Y方向微调
             );
+            //3.绘制坐骑描边
             if (this.tog_debug.Checked)
                 g.DrawRectangle(new Pen(Color.Green, 1), new Rectangle(scrollX + pos_mount.X, scrollY + pos_mount.Y, largeImage.Width, largeImage.Height));
 
-            // 2. 绘制小图
+            // 4. 绘制角色
             if (smallImage != null && this.tog_show_role.Checked)
             {
                 g.DrawImage(
@@ -528,6 +535,7 @@ namespace mount_role
                      scrollX + largeImage.Width / 2 + pos_mount.X + pos_role.X,
                      scrollY + largeImage.Height / 2 + pos_mount.Y + pos_role.Y
                 );
+                // 5. 绘制角色描边
                 if (this.tog_debug.Checked)
                     g.DrawRectangle(new Pen(Color.Green, 1), 
                         new Rectangle(
@@ -538,7 +546,7 @@ namespace mount_role
 
             if (this.tog_debug.Checked)
             {
-                // 4. 绘制绿色虚线十字线
+                // 6. 绘制绿色虚线十字线
                 using (Pen greenPen = new Pen(Color.White, 0.2f)
                 {
                     DashStyle = DashStyle.Dash,
