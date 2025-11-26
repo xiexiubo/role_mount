@@ -7,6 +7,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime;
+using System.Threading;
 using System.Windows.Forms;
 namespace mount_role
 {
@@ -108,22 +109,26 @@ namespace mount_role
             this.largeImage = null;
             this.smallImage = null;
             AddLog("开始合图！");
+            AddLog("1算出尺寸！");
             string pathMount = txtFolderPath.Text;
             string tempPath1 = Path.Combine(pathMount, "导出");
             string tempPath2 = Path.Combine(pathMount, "导出_优化");
             string tempPath3 = Path.Combine(pathMount, "导出_合成");
             string tempPath4 = Path.Combine(pathMount, "导出_优化_合成");
             //1.----对齐-------
-            this.listImagePath = ResizePngSave(pathMount, tempPath1);
-            //2.----优化-------
-            if (this.tog4.Checked)
+            if (this.listImagePath.Count == 0 || !this.listImagePath[0].Contains("导出_优化")) 
             {
-                AddLog("优化尺寸", Color.Brown);
-                AddLog("优化中。。。", Color.Green);
-                ImageCropper cropper = new ImageCropper();
-                await cropper.ProcessImagesAsync(this.listImagePath, tempPath2, AddLog);
-                cropper = null;
-            }
+                this.listImagePath = ResizePngSave(pathMount, tempPath1);
+                //2.----优化-------
+                if (this.tog4.Checked)
+                {
+                    AddLog("优化尺寸", Color.Brown);
+                    AddLog("优化中。。。", Color.Green);
+                    ImageCropper cropper = new ImageCropper();
+                    await cropper.ProcessImagesAsync(this.listImagePath, tempPath2, AddLog);
+                    cropper = null;
+                }
+            }           
             var outDir = tempPath3;
             //3.----合并-------
             this.listImagePath = this.CombinePngSave(this.listImagePath, tempPath3);
@@ -677,9 +682,12 @@ namespace mount_role
                         // 计算缩放后的尺寸
                         int newWidth = (int)(originalImage.Width * scale);
                         int newHeight = (int)(originalImage.Height * scale);
-
+                       
                         newWidth = Math.Max(newWidth, 1);
                         newHeight = Math.Max(newHeight, 1);
+
+                        if (newWidth > 10)
+                            this.sizeOut = new Size(newWidth, newHeight);
 
                         using (Bitmap scaledImage = new Bitmap(newWidth, newHeight))
                         {
