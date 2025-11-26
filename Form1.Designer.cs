@@ -194,8 +194,11 @@
             // 
             // num_m_scale
             // 
+            num_m_scale.DecimalPlaces = 1;
+            num_m_scale.Increment = new decimal(new int[] { 1, 0, 0, 65536 });
             num_m_scale.Location = new Point(54, 50);
-            num_m_scale.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
+            num_m_scale.Maximum = new decimal(new int[] { 50, 0, 0, 65536 });
+            num_m_scale.Minimum = new decimal(new int[] { 1, 0, 0, 65536 });
             num_m_scale.Name = "num_m_scale";
             num_m_scale.Size = new Size(42, 23);
             num_m_scale.TabIndex = 14;

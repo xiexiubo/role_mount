@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -121,6 +122,7 @@ namespace mount_role
                 AddLog("优化中。。。", Color.Green);
                 ImageCropper cropper = new ImageCropper();
                 await cropper.ProcessImagesAsync(this.listImagePath, tempPath2, AddLog);
+                cropper = null;
             }
             var outDir = tempPath3;
             //3.----合并-------
@@ -133,6 +135,7 @@ namespace mount_role
                 AddLog("优化中。。。", Color.Green);
                 ImageCropper cropper = new ImageCropper();
                 await cropper.ProcessImagesAsync(this.listImagePath, tempPath4, AddLog);
+                cropper = null;
                 outDir = tempPath4;
             }
             // 启动资源管理器并指定目录
@@ -165,6 +168,7 @@ namespace mount_role
                 ImageCropper cropper = new ImageCropper();
                 string tempPath2 = Path.Combine(pathMount, "导出_优化");
                 await cropper.ProcessImagesAsync(this.listImagePath, tempPath2, AddLog);
+                cropper = null;
             }
             this.SetImage();
             this._repaint();
@@ -655,6 +659,7 @@ namespace mount_role
         private void btn_m_reszie_Click(object sender, EventArgs e)
         {
             AddLog("缩放坐骑");
+            if(largeImage != null) largeImage.Dispose();
             this.largeImage = null;
             this.smallImage = null;
             for (int i = 0; i < listImagePath.Count; i++)
@@ -664,6 +669,7 @@ namespace mount_role
 
                 // 先将图像读入内存流，再从内存流加载，避免锁定文件
                 byte[] imageBytes = File.ReadAllBytes(path);
+                
                 using (MemoryStream ms = new MemoryStream(imageBytes))
                 {
                     using (Image originalImage = Image.FromStream(ms))
@@ -683,7 +689,7 @@ namespace mount_role
                                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                                 g.DrawImage(originalImage, 0, 0, newWidth, newHeight);
                             }
-
+                           
                             // 保存前确保文件已释放
                             string tempPath = Path.GetTempFileName();
                             try
@@ -705,9 +711,12 @@ namespace mount_role
                         }
                     }
                 }
+                imageBytes = null;
             }
 
-            _repaint();
+          
+            this.SetImage();
+            this._repaint();
         }
 
         private void btn_pre_Click(object sender, EventArgs e)
